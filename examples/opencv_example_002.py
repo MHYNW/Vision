@@ -1,3 +1,6 @@
+## License: Apache 2.0. See LICENSE file in root directory.
+## Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
+
 ###############################################
 ##      Open CV and Numpy integration        ##
 ###############################################
@@ -46,10 +49,11 @@ try:
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         pool_image = average_pooling(depth_image)
+        distance_image = cv2.convertScaleAbs(depth_image, alpha=0.03) 
         # color_image = np.asanyarray(color_frame.get_data())
 
         # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
-        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_BONE)
+        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(pool_image, alpha=0.03), cv2.COLORMAP_BONE)
 
         # Canny edge detector
         edge = cv2.Canny(depth_colormap, 50, 150)
@@ -64,11 +68,11 @@ try:
 
         # Show images
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-        cv2.imshow('RealSense', depth_image)
+        cv2.imshow('RealSense', distance_image)
         cv2.waitKey(1)
         # print("depth: {0}, distance: {1}".format(depth_image(320, 240), depth_frame.get_distance(320,240)))
         print("distnace: {}".format(depth_frame.get_distance(320, 240)))
-        print("depth: {}".format(depth_image[320,240]))
+        print("depth: {}".format(distance_image[320,240]))
 
 finally:
     # Stop streaming
