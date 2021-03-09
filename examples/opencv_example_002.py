@@ -31,13 +31,17 @@ def average_pooling(img, G=8):
     return out
 
 # Start streaming
-pipeline.start(config)
+profile = pipeline.start(config)
 
 try:
     while True:
         # Wait for a coherent pair of frames: depth and color
         frames = pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
+        depth_sensor = profile.get_device().first_depth_sensor()
+        # visual preset number can be change, didn't fixed yet. can be 0. and maybe it means the high accuracy of the sensor
+        depth_sensor.set_option(rs.option.visual_preset, 3)
+        depth_scale = depth_sensor.get_depth_scale()
         # color_frame = frames.get_color_frame()
         '''
         if not depth_frame or not color_frame:
@@ -48,6 +52,7 @@ try:
 
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
+        scale_image = np.asanyarray(depth_scale)
         pool_image = average_pooling(depth_image)
         distance_image = cv2.convertScaleAbs(depth_image, alpha=0.03) 
         # color_image = np.asanyarray(color_frame.get_data())
@@ -68,7 +73,8 @@ try:
 
         # Show images
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-        cv2.imshow('RealSense', distance_image)
+        # cv2.imshow('RealSense', distance_image)
+        cv2.imshow('Scale Image', scale_image)
         cv2.waitKey(1)
         # print("depth: {0}, distance: {1}".format(depth_image(320, 240), depth_frame.get_distance(320,240)))
         print("distnace: {}".format(depth_frame.get_distance(320, 240)))
