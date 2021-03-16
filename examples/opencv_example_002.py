@@ -53,8 +53,9 @@ try:
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         scale_image = np.asanyarray(depth_scale)
+        print("depth min: {}".format(np.min(depth_image)))
         pool_image = average_pooling(depth_image)
-        distance_image = cv2.convertScaleAbs(depth_image, alpha=0.03) 
+        distance_image = cv2.convertScaleAbs(depth_image, alpha=1, beta=0) 
         # color_image = np.asanyarray(color_frame.get_data())
 
         # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
@@ -73,12 +74,12 @@ try:
 
         # Show images
         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-        # cv2.imshow('RealSense', distance_image)
-        cv2.imshow('Scale Image', scale_image)
+        cv2.imshow('RealSense', distance_image)
+        # cv2.imshow('RealSense', scale_image)
         cv2.waitKey(1)
         # print("depth: {0}, distance: {1}".format(depth_image(320, 240), depth_frame.get_distance(320,240)))
         print("distnace: {}".format(depth_frame.get_distance(320, 240)))
-        print("depth: {}".format(distance_image[320,240]))
+        print("depth: {}".format(depth_image[320,240]))
 
 finally:
     # Stop streaming
