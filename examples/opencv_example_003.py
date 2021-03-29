@@ -38,8 +38,17 @@ try:
         frames = pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         depth_sensor = profile.get_device().first_depth_sensor()
+        if depth_sensor.supports(rs.option.emitter_enabled):
+            print("emitter yeeeees")
+            depth_sensor.set_option(rs.option.emitter_enabled, 1)
+
+        if depth_sensor.supports(rs.option.laser_power):
+            print("laser yesssss")
+            range = depth_sensor.get_option_range(rs.option.laser_power)
+            depth_sensor.set_option(rs.option.laser_power, range.max)
+
         # visual preset number can be change, didn't fixed yet. can be 0. and maybe it means the high accuracy of the sensor
-        depth_sensor.set_option(rs.option.visual_preset, 0)
+        # depth_sensor.set_option(rs.option.visual_preset, 0)
         depth_scale = depth_sensor.get_depth_scale()
        # color_frame = frames.get_color_frame()
         '''
@@ -52,12 +61,12 @@ try:
         # Convert images to numpy arrays
         depth_image = np.asanyarray(depth_frame.get_data())
         scale_image = np.asanyarray(depth_scale)
-        pool_image = average_pooling(depth_image)
+        # pool_image = average_pooling(depth_image)
         distance_image = cv2.convertScaleAbs(depth_image, alpha=1, beta=0) 
         # color_image = np.asanyarray(color_frame.get_data())
 
         # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
-        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(pool_image, alpha=0.03), cv2.COLORMAP_BONE)
+        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_BONE)
 
         # Canny edge detector
         edge = cv2.Canny(depth_colormap, 50, 150)
