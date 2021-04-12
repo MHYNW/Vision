@@ -39,11 +39,11 @@ try:
         depth_frame = frames.get_depth_frame()
         depth_sensor = profile.get_device().first_depth_sensor()
         if depth_sensor.supports(rs.option.emitter_enabled):
-            print("emitter yeeeees")
+            print("emitter onnnnnnnn")
             depth_sensor.set_option(rs.option.emitter_enabled, 1)
 
         if depth_sensor.supports(rs.option.laser_power):
-            print("laser yesssss")
+            print("laser oooooooon")
             range = depth_sensor.get_option_range(rs.option.laser_power)
             depth_sensor.set_option(rs.option.laser_power, range.max)
 
@@ -65,11 +65,21 @@ try:
         distance_image = cv2.convertScaleAbs(depth_image, alpha=1, beta=0) 
         # color_image = np.asanyarray(color_frame.get_data())
 
+        '''std'''
+        std_depth_image = np.std(depth_image)
+        mean_depth_imae = np.mean(depth_image)
+        print("std: {}".format(std_depth_image))
+        print("mean: {}".format(mean_depth_imae))
+
+
+
         # Apply colormap on depth image (image must be converted to 8-bit per pixel first)
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_BONE)
 
+        ''' edge detector(TBD)
         # Canny edge detector
         edge = cv2.Canny(depth_colormap, 50, 150)
+        '''
         # pool_image = average_pooling(edge)
 
         # Stack both images horizontally
@@ -84,11 +94,12 @@ try:
         cv2.imshow('RealSense', distance_image)
         # cv2.imshow('RealSense', scale_image)
         cv2.waitKey(1)
-        # print("depth: {0}, distance: {1}".format(depth_image(320, 240), depth_frame.get_distance(320,240)))
+        '''
         print("distnace: {}".format(depth_frame.get_distance(320, 240)))
         print("depth: {}".format(depth_image[320,240]))
         print("distnce estimate: {}".format(depth_scale*depth_image[320,240]))
         print("depth scale: {}".format(depth_scale))
+        '''
 
 finally:
     # Stop streaming
