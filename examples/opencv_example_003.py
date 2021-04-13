@@ -32,10 +32,30 @@ def average_pooling(img, G=8):
 # Start streaming
 profile = pipeline.start(config)
 
+# Set Depth sensor and scale
+depth_sensor = profile.get_device().first_depth_sensor()
+
+if depth_sensor.supports(rs.option.emitter_enabled):
+    print("emitter on")
+    depth_sensor.set_option(rs.option.emitter_enabled, 1)
+
+if depth_sensor.supports(rs.option.laser_power):
+    print("laser on")
+    range = depth_sensor.get_option_range(rs.option.laser_power)
+    depth_sensor.set_option(rs.option.laser_power, range.max)
+
+depth_scale = depth_sensor.get_depth_scale()
+
+
+
 try:
     while True:
         # Wait for a coherent pair of frames: depth and color
         frames = pipeline.wait_for_frames()
+
+        depth_frame = frames.get_depth_frame()
+
+        '''
         depth_frame = frames.get_depth_frame()
         depth_sensor = profile.get_device().first_depth_sensor()
         if depth_sensor.supports(rs.option.emitter_enabled):
@@ -46,10 +66,11 @@ try:
             print("laser oooooooon")
             range = depth_sensor.get_option_range(rs.option.laser_power)
             depth_sensor.set_option(rs.option.laser_power, range.max)
+        '''
 
         # visual preset number can be change, didn't fixed yet. can be 0. and maybe it means the high accuracy of the sensor
         # depth_sensor.set_option(rs.option.visual_preset, 0)
-        depth_scale = depth_sensor.get_depth_scale()
+        # depth_scale = depth_sensor.get_depth_scale()
        # color_frame = frames.get_color_frame()
         '''
         if not depth_frame or not color_frame:
