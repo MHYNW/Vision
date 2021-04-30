@@ -9,6 +9,10 @@ import pyrealsense2 as rs
 import numpy as np
 import cv2
 import tensorflow as tf
+import velocity_generator
+import sys
+import math 
+import threading
 
 # Configure depth and color streams
 pipeline = rs.pipeline()
@@ -17,6 +21,11 @@ config = rs.config()
 config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
 # RGB Image, 960 x 540, 30fps
 config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
+
+# distance importing
+vel = velocity_generator.vel_generator()
+vel.RandAccGen()
+
 
 # average pooling 
 def average_pooling(img, G=8):
@@ -72,14 +81,29 @@ try:
         depth_image = np.asanyarray(aligned_depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
 
+        # velocity importing
+        velocity = vel.vel
+        vector_direction = vel.vel_dir
+        acc = 1 # [m/s^2]
+        print("velocity direction: {}".format(vector_direction))
+        if vector_direction == 1:
+            clipping_distance = velocity[0, 0]**2/2*acc
+        else:
+            clipping_distance = 1
+        
+        clipping_depth = clipping_distance/depth_scale
+
+
         # std
+        '''
         std_depth_image = np.std(depth_image)
         mean_depth_image = np.mean(depth_image)
-        clipping_depth = 2*std_depth_image + mean_depth_image
+        clipping_depth = std_depth_image + mean_depth_image
         clipping_distance = depth_scale * clipping_depth
         print("std: {}".format(std_depth_image))
         print("mean: {}".format(mean_depth_image))
         print("clipping distance : {}".format(clipping_distance))
+        '''
 
         # Set background
         grey_color = 153
@@ -87,7 +111,7 @@ try:
         bg_removed = np.where((depth_image_3d > clipping_depth) | (depth_image_3d <= 0), grey_color, color_image)
 
         # Render images
-        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+        # depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
         #images = np.hstack((bg_removed, depth_colormap))
         cv2.namedWindow('Align Example', cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Align Example', bg_removed)
