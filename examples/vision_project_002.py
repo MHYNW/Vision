@@ -1,10 +1,10 @@
 ## License: Apache 2.0. See LICENSE file in root directory.
 ## Copyright(c) 2015-2017 Intel Corporation. All Rights Reserved.
-## 2021.05.04 ver. velocity dependant with clipping distance
+## 2020.05.~ ver. dependant with size of UAV
 ###############################################
 ##      Open CV and Numpy integration        ##
 ###############################################
-# size and noise 
+
 import pyrealsense2 as rs
 import numpy as np
 import cv2
@@ -89,7 +89,7 @@ try:
         if vector_direction == 1:
             clipping_distance = velocity[0, 0]**2/2*acc
         else:
-            clipping_distance = 10
+            clipping_distance = 1
         
         clipping_depth = clipping_distance/depth_scale
 
