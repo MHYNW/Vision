@@ -26,6 +26,9 @@ config.enable_stream(rs.stream.color, 960, 540, rs.format.bgr8, 30)
 vel = velocity_generator.vel_generator()
 vel.RandAccGen()
 
+# Gaussian Filter
+kernel_1d = cv2.getGaussianKernel(5, 3)
+kernel_2d = np.outer(kernel_1d, kernel_1d.transpose())
 
 # average pooling 
 def average_pooling(img, G=8):
@@ -79,13 +82,16 @@ try:
             continue
         
         depth_image = np.asanyarray(aligned_depth_frame.get_data())
+        filtered_image = cv2.medianBlur(depth_image, 5)
+
+
         color_image = np.asanyarray(color_frame.get_data())
 
         # velocity importing
         velocity = vel.vel
         vector_direction = vel.vel_dir
         acc = 1 # [m/s^2]
-        print("velocity direction: {}".format(vector_direction))
+        # print("velocity direction: {}".format(vector_direction))
         if vector_direction == 1:
             clipping_distance = velocity[0, 0]**2/2*acc
         else:
@@ -107,8 +113,12 @@ try:
 
         # Set background
         grey_color = 153
+        depth_image_3d = np.dstack((filtered_image, filtered_image, filtered_image)) #depth image is 1 channel, color is 3 channels
+        '''
         depth_image_3d = np.dstack((depth_image, depth_image, depth_image)) #depth image is 1 channel, color is 3 channels
-        bg_removed = np.where((depth_image_3d > clipping_depth) | (depth_image_3d <= 0), grey_color, color_image)
+        '''
+        bg_removed = np.where((depth_image_3d < clipping_depth) | (depth_image_3d <= 0), grey_color, color_image)
+       # bg_removed = np.where((depth_image < clipping_depth) | (depth_image <= 0), grey_color, filtered_image)
 
         # Render images
         # depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)

@@ -31,7 +31,7 @@ class vel_generator:
         self.vel_y = self.vel[0, 1]
         self.vel_z = self.vel[0, 2]
 
-        print("velocity: {}".format(self.vel))
+        # print("velocity: {}".format(self.vel))
         threading.Timer(0.01, self.RandAccGen).start()
 
 def main():
